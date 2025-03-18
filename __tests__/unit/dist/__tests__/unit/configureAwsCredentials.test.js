@@ -1,9 +1,9 @@
 import { jest } from '@jest/globals';
-import * as core from '../__fixtures__/core.js';
-import * as stsClient from '../__fixtures__/aws-sdk.js';
+import * as core from '../../__fixtures__/core.js';
+import * as stsClient from '../../__fixtures__/aws-sdk.js';
 jest.unstable_mockModule('@actions/core', () => core);
 jest.unstable_mockModule('@aws-sdk/client-sts', () => stsClient);
-const { configureAwsCredentials } = await import('../src/adapters/frameworks/AWS');
+const { configureAwsCredentials } = await import('../../src/adapters/frameworks/Aws.js');
 describe('Configure AWS Credentials', () => {
     beforeEach(() => {
         jest.clearAllMocks();

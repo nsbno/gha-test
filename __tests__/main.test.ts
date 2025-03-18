@@ -13,6 +13,10 @@ jest.unstable_mockModule('@actions/exec', () => exec)
 jest.unstable_mockModule('@aws-sdk/client-sts', () => stsClient)
 
 const main = await import('../src/main.js')
+const { checkTerraformChanges } = await import(
+  '../src/adapters/frameworks/Terraform.js'
+)
+const { getEnvironments } = await import('../src/adapters/frameworks/Github.js')
 
 describe('FindTerraformChanges', () => {
   beforeEach(() => {
@@ -87,15 +91,15 @@ describe('FindTerraformChanges', () => {
 
   it('should get environments', async () => {
     const environments = ['Test', 'Stage', 'Production']
-    const getEnvironments = await main.getEnvironments()
+    const getGitHubEnvironments = await getEnvironments()
 
-    expect(getEnvironments).toStrictEqual(environments)
+    expect(getGitHubEnvironments).toStrictEqual(environments)
   })
 
   it('should detect changed environments', async () => {
     const environments = ['Test', 'Stage', 'Production']
 
-    const result = await main.checkTerraformChanges(environments)
+    const result = await checkTerraformChanges(environments)
 
     expect(result).toEqual(['Stage'])
     expect(core.notice).toHaveBeenCalledWith(
