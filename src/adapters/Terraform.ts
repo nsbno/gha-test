@@ -1,7 +1,6 @@
 import * as exec from '@actions/exec'
 import * as core from '@actions/core'
 import { InfrastructureExecutor } from '../ports/driver/InfrastructureExecutor.js'
-import { ExecError } from '../types.js'
 
 export class TerraformExecutor implements InfrastructureExecutor {
   async planInfrastructure(environment: string): Promise<boolean> {
@@ -20,22 +19,25 @@ async function runTerraformPlan(directory: string): Promise<boolean> {
   await exec.exec('terraform', ['init'], { cwd: directory })
   // Run terraform plan with detailed exitcode
   try {
-    await exec.exec(
+    const exitCode = await exec.exec(
       'terraform',
-      ['plan', '--refresh=false', '-detailed-exitcode'],
+      ['plan', '--refresh=false', '--detailed-exitcode'],
       {
         cwd: directory
       }
     )
-    // Exit code 0 means no changes
-    return false
-  } catch (error: unknown) {
-    const execError = error as ExecError
-    // Exit code 2 means changes detected
-    if (execError.code === 2) {
-      return true
+
+    // Process exit codes
+    if (exitCode === 0) {
+      return false // No changes
+    } else if (exitCode === 2) {
+      return true // Changes detected
+    } else {
+      throw new Error(`Terraform plan failed with exit code ${exitCode}`)
     }
-    // Any other exit code indicates an error
-    throw new Error(`Terraform plan failed with exit code ${execError.code}`)
+  } catch (error) {
+    throw new Error(
+      `Error executing terraform: ${error instanceof Error ? error.message : String(error)}`
+    )
   }
 }
