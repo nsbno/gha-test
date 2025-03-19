@@ -12,7 +12,7 @@ describe('getTerraformChanges', () => {
     beforeEach(() => {
         process.env.AWS_REGION = 'eu-west-1';
         process.env.AWS_ACCOUNT_ID = '123456789012';
-        process.env.AWS_ROLE_NAME = 'deployment-trusted-role';
+        process.env.AWS_DEPLOYMENT_ROLE_NAME = 'deployment-trusted-role';
         stsClient.send.mockResolvedValue({
             $metadata: {},
             Credentials: {
