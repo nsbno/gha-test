@@ -7,7 +7,9 @@ import { mockOctokit } from '../../__fixtures__/github.js'
 jest.unstable_mockModule('@actions/core', () => core)
 jest.unstable_mockModule('@actions/github', () => github)
 
-const { GetEnvironmentsUseCase } = await import('../../src/core/usecases/GetEnvironments.js')
+const { GetEnvironmentsUseCase } = await import(
+  '../../src/core/usecases/GetEnvironments.js'
+)
 
 describe('get environments', () => {
   beforeEach(() => {
