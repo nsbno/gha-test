@@ -9,11 +9,9 @@ branding:
 
 # Define your inputs here.
 inputs:
-  force-deploy:
-    description: 'Force deployment regardless of changes'
-    required: false
-    default: false
-
+  environment:
+    description: 'The environment to run the action in'
+    required: true
 
 runs:
   using: node20
