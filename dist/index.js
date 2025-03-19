@@ -35965,10 +35965,10 @@ function setupApplication() {
     return { assumeRole, getInfraChanges };
 }
 
-const { assumeRole, getInfraChanges } = setupApplication();
+const { getInfraChanges } = setupApplication();
 async function run() {
     try {
-        await assumeRole.execute();
+        // await assumeRole.execute()
         const environment = coreExports.getInput('environment', { required: true });
         await getInfraChanges.executeWithEnvDirectory(environment);
     }
