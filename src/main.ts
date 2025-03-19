@@ -9,7 +9,7 @@ export async function run(): Promise<void> {
 
     const environment = core.getInput('environment', { required: true })
 
-    await getInfraChanges.execute(environment)
+    await getInfraChanges.executeWithEnvDirectory(environment)
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message)

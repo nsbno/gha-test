@@ -45,7 +45,7 @@ describe('getTerraformChanges', () => {
     it('should detect no changes across a specific environment', async () => {
         const { assumeRole, getInfraChanges } = setupApplication();
         await assumeRole.execute();
-        await getInfraChanges.execute('Prod');
+        await getInfraChanges.executeWithEnvDirectory('Production');
         // Verify terraform was executed with correct arguments
         expect(exec.exec).toHaveBeenCalledWith('terraform', ['init'], {
             cwd: 'environments/prod'
@@ -57,14 +57,20 @@ describe('getTerraformChanges', () => {
     it('should detect changes in a specific environment', async () => {
         const { assumeRole, getInfraChanges } = setupApplication();
         await assumeRole.execute();
-        await getInfraChanges.execute('Test');
+        await getInfraChanges.executeWithEnvDirectory('Test');
         // Verify terraform was executed with correct arguments
         expect(exec.exec).toHaveBeenCalledWith('terraform', ['init'], {
             cwd: 'environments/test'
         });
         expect(exec.exec).toHaveBeenCalledWith('terraform', ['plan', '--refresh=false', '-detailed-exitcode'], { cwd: 'environments/test' });
-        // Changes were detected, so exportVariable should be called
-        expect(core.exportVariable).toHaveBeenCalledWith('LIST_ENVIRONMENT_CHANGED', ',Test');
+        expect(core.exportVariable).toHaveBeenCalledWith('LIST_ENVIRONMENT_CHANGED', 'Test');
+    });
+    it('should detect changes in multiple environments', async () => {
+        process.env.LIST_ENVIRONMENT_CHANGED = 'Stage';
+        const { assumeRole, getInfraChanges } = setupApplication();
+        await assumeRole.execute();
+        await getInfraChanges.executeWithEnvDirectory('Test');
+        expect(core.exportVariable).toHaveBeenCalledWith('LIST_ENVIRONMENT_CHANGED', 'Stage,Test');
     });
     it('should handle invalid environment config', async () => { });
     it('developer using force-deploy true should skip all checks', async () => { });

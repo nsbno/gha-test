@@ -5,7 +5,7 @@ export async function run() {
     try {
         await assumeRole.execute();
         const environment = core.getInput('environment', { required: true });
-        await getInfraChanges.execute(environment);
+        await getInfraChanges.executeWithEnvDirectory(environment);
     }
     catch (error) {
         if (error instanceof Error) {

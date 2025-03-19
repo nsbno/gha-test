@@ -58,7 +58,7 @@ describe('getTerraformChanges', () => {
     const { assumeRole, getInfraChanges } = setupApplication()
 
     await assumeRole.execute()
-    await getInfraChanges.execute('Prod')
+    await getInfraChanges.executeWithEnvDirectory('Production')
 
     // Verify terraform was executed with correct arguments
     expect(exec.exec).toHaveBeenCalledWith('terraform', ['init'], {
@@ -78,7 +78,7 @@ describe('getTerraformChanges', () => {
     const { assumeRole, getInfraChanges } = setupApplication()
 
     await assumeRole.execute()
-    await getInfraChanges.execute('Test')
+    await getInfraChanges.executeWithEnvDirectory('Test')
 
     // Verify terraform was executed with correct arguments
     expect(exec.exec).toHaveBeenCalledWith('terraform', ['init'], {
@@ -90,10 +90,22 @@ describe('getTerraformChanges', () => {
       { cwd: 'environments/test' }
     )
 
-    // Changes were detected, so exportVariable should be called
     expect(core.exportVariable).toHaveBeenCalledWith(
       'LIST_ENVIRONMENT_CHANGED',
-      ',Test'
+      'Test'
+    )
+  })
+
+  it('should detect changes in multiple environments', async () => {
+    process.env.LIST_ENVIRONMENT_CHANGED = 'Stage'
+    const { assumeRole, getInfraChanges } = setupApplication()
+
+    await assumeRole.execute()
+    await getInfraChanges.executeWithEnvDirectory('Test')
+
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'LIST_ENVIRONMENT_CHANGED',
+      'Stage,Test'
     )
   })
 
