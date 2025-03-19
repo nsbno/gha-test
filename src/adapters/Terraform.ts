@@ -27,7 +27,7 @@ async function runTerraformPlan(directory: string): Promise<boolean> {
       }
     )
 
-    // Process exit codes
+    console.log(exitCode)
     if (exitCode === 0) {
       return false // No changes
     } else if (exitCode === 2) {

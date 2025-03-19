@@ -20,7 +20,7 @@ async function runTerraformPlan(directory) {
         const exitCode = await exec.exec('terraform', ['plan', '--refresh=false', '--detailed-exitcode'], {
             cwd: directory
         });
-        // Process exit codes
+        console.log(exitCode);
         if (exitCode === 0) {
             return false; // No changes
         }
