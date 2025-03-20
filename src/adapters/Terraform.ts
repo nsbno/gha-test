@@ -17,17 +17,27 @@ export class TerraformExecutor implements InfrastructureExecutor {
 async function runTerraformPlan(directory: string): Promise<boolean> {
   // First run terraform init
   await exec.exec('terraform', ['init'], { cwd: directory })
-  // Run terraform plan with detailed exitcode
   try {
+    let terraformOutput = ''
+    let terraformError = ''
     const exitCode = await exec.exec(
       'terraform',
-      ['plan', '--refresh=false', '--detailed-exitcode;', 'echo$?'],
+      ['plan', '--refresh=false', '--detailed-exitcode'],
       {
         cwd: directory,
-        ignoreReturnCode: true
+        ignoreReturnCode: true,
+        listeners: {
+          stdout: (data: Buffer) => {
+            terraformOutput += data.toString()
+          },
+          stderr: (data: Buffer) => {
+            terraformError += data.toString()
+          }
+        }
       }
     )
-
+    core.debug(`Terraform output: ${terraformOutput}`)
+    core.debug(`Terraform stderr: ${terraformError}`)
     core.debug(`Terraform plan exit code: ${exitCode}`)
     switch (exitCode) {
       case 0:

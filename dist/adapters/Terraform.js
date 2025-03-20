@@ -15,12 +15,23 @@ export class TerraformExecutor {
 async function runTerraformPlan(directory) {
     // First run terraform init
     await exec.exec('terraform', ['init'], { cwd: directory });
-    // Run terraform plan with detailed exitcode
     try {
-        const exitCode = await exec.exec('terraform', ['plan', '--refresh=false', '--detailed-exitcode;', 'echo$?'], {
+        let terraformOutput = '';
+        let terraformError = '';
+        const exitCode = await exec.exec('terraform', ['plan', '--refresh=false', '--detailed-exitcode'], {
             cwd: directory,
-            ignoreReturnCode: true
+            ignoreReturnCode: true,
+            listeners: {
+                stdout: (data) => {
+                    terraformOutput += data.toString();
+                },
+                stderr: (data) => {
+                    terraformError += data.toString();
+                }
+            }
         });
+        core.debug(`Terraform output: ${terraformOutput}`);
+        core.debug(`Terraform stderr: ${terraformError}`);
         core.debug(`Terraform plan exit code: ${exitCode}`);
         switch (exitCode) {
             case 0:
