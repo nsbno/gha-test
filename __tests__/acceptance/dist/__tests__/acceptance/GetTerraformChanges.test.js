@@ -50,7 +50,10 @@ describe('getTerraformChanges', () => {
         expect(exec.exec).toHaveBeenCalledWith('terraform', ['init'], {
             cwd: 'environments/prod'
         });
-        expect(exec.exec).toHaveBeenCalledWith('terraform', ['plan', '--refresh=false', '--detailed-exitcode'], { cwd: 'environments/prod' });
+        expect(exec.exec).toHaveBeenCalledWith('terraform', ['plan', '--refresh=false', '--detailed-exitcode'], {
+            cwd: 'environments/prod',
+            ignoreReturnCode: true
+        });
         // No changes detected, so exportVariable shouldn't be called
         expect(core.exportVariable).not.toHaveBeenCalled();
     });
@@ -62,7 +65,10 @@ describe('getTerraformChanges', () => {
         expect(exec.exec).toHaveBeenCalledWith('terraform', ['init'], {
             cwd: 'environments/test'
         });
-        expect(exec.exec).toHaveBeenCalledWith('terraform', ['plan', '--refresh=false', '--detailed-exitcode'], { cwd: 'environments/test' });
+        expect(exec.exec).toHaveBeenCalledWith('terraform', ['plan', '--refresh=false', '--detailed-exitcode'], {
+            cwd: 'environments/test',
+            ignoreReturnCode: true
+        });
         expect(core.exportVariable).toHaveBeenCalledWith('LIST_ENVIRONMENT_CHANGED', 'Test');
     });
     it('should detect changes in multiple environments', async () => {

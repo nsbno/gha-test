@@ -67,7 +67,10 @@ describe('getTerraformChanges', () => {
     expect(exec.exec).toHaveBeenCalledWith(
       'terraform',
       ['plan', '--refresh=false', '--detailed-exitcode'],
-      { cwd: 'environments/prod' }
+      {
+        cwd: 'environments/prod',
+        ignoreReturnCode: true
+      }
     )
 
     // No changes detected, so exportVariable shouldn't be called
@@ -87,7 +90,10 @@ describe('getTerraformChanges', () => {
     expect(exec.exec).toHaveBeenCalledWith(
       'terraform',
       ['plan', '--refresh=false', '--detailed-exitcode'],
-      { cwd: 'environments/test' }
+      {
+        cwd: 'environments/test',
+        ignoreReturnCode: true
+      }
     )
 
     expect(core.exportVariable).toHaveBeenCalledWith(

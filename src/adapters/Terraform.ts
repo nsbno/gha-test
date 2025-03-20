@@ -23,7 +23,8 @@ async function runTerraformPlan(directory: string): Promise<boolean> {
       'terraform',
       ['plan', '--refresh=false', '--detailed-exitcode'],
       {
-        cwd: directory
+        cwd: directory,
+        ignoreReturnCode: true
       }
     )
 
