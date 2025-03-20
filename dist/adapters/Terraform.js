@@ -18,7 +18,8 @@ async function runTerraformPlan(directory) {
     try {
         let terraformOutput = '';
         let terraformError = '';
-        const exitCode = await exec.exec('terraform', ['plan', '--refresh=false', '--detailed-exitcode'], {
+        let returnCode = 0;
+        const options = {
             cwd: directory,
             ignoreReturnCode: true,
             listeners: {
@@ -29,18 +30,27 @@ async function runTerraformPlan(directory) {
                     terraformError += data.toString();
                 }
             }
-        });
+        };
+        try {
+            await exec.exec('terraform', ['plan', '--refresh=false', '--detailed-exitcode'], {
+                ...options,
+                listeners: {
+                    ...options.listeners,
+                    stdline: (line) => {
+                        core.debug(line);
+                    }
+                }
+            });
+        }
+        catch (err) {
+            if (err instanceof Error && 'code' in err) {
+                returnCode = err.code;
+            }
+        }
         core.debug(`Terraform output: ${terraformOutput}`);
         core.debug(`Terraform stderr: ${terraformError}`);
-        core.debug(`Terraform plan exit code: ${exitCode}`);
-        switch (exitCode) {
-            case 0:
-                return false; // No changes
-            case 2:
-                return true; // Changes detected
-            default:
-                throw new Error(`Terraform plan failed with exit code ${exitCode}`);
-        }
+        core.debug(`Terraform plan exit code: ${returnCode}`);
+        return returnCode === 2;
     }
     catch (error) {
         throw new Error(`Error executing terraform: ${error instanceof Error ? error.message : String(error)}`);

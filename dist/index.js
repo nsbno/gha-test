@@ -35938,7 +35938,8 @@ async function runTerraformPlan(directory) {
     try {
         let terraformOutput = '';
         let terraformError = '';
-        const exitCode = await execExports.exec('terraform', ['plan', '--refresh=false', '--detailed-exitcode'], {
+        let returnCode = 0;
+        const options = {
             cwd: directory,
             ignoreReturnCode: true,
             listeners: {
@@ -35949,18 +35950,27 @@ async function runTerraformPlan(directory) {
                     terraformError += data.toString();
                 }
             }
-        });
+        };
+        try {
+            await execExports.exec('terraform', ['plan', '--refresh=false', '--detailed-exitcode'], {
+                ...options,
+                listeners: {
+                    ...options.listeners,
+                    stdline: (line) => {
+                        coreExports.debug(line);
+                    }
+                }
+            });
+        }
+        catch (err) {
+            if (err instanceof Error && 'code' in err) {
+                returnCode = err.code;
+            }
+        }
         coreExports.debug(`Terraform output: ${terraformOutput}`);
         coreExports.debug(`Terraform stderr: ${terraformError}`);
-        coreExports.debug(`Terraform plan exit code: ${exitCode}`);
-        switch (exitCode) {
-            case 0:
-                return false; // No changes
-            case 2:
-                return true; // Changes detected
-            default:
-                throw new Error(`Terraform plan failed with exit code ${exitCode}`);
-        }
+        coreExports.debug(`Terraform plan exit code: ${returnCode}`);
+        return returnCode === 2;
     }
     catch (error) {
         throw new Error(`Error executing terraform: ${error instanceof Error ? error.message : String(error)}`);
