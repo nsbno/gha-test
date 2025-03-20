@@ -17,19 +17,18 @@ async function runTerraformPlan(directory) {
     await exec.exec('terraform', ['init'], { cwd: directory });
     // Run terraform plan with detailed exitcode
     try {
-        const exitCode = await exec.exec('terraform', ['plan', '--refresh=false', '--detailed-exitcode'], {
+        const exitCode = await exec.exec('terraform', ['plan', '--refresh=false', '--detailed-exitcode;', 'echo$?'], {
             cwd: directory,
             ignoreReturnCode: true
         });
-        console.log(exitCode);
-        if (exitCode === 0) {
-            return false; // No changes
-        }
-        else if (exitCode === 2) {
-            return true; // Changes detected
-        }
-        else {
-            throw new Error(`Terraform plan failed with exit code ${exitCode}`);
+        core.debug(`Terraform plan exit code: ${exitCode}`);
+        switch (exitCode) {
+            case 0:
+                return false; // No changes
+            case 2:
+                return true; // Changes detected
+            default:
+                throw new Error(`Terraform plan failed with exit code ${exitCode}`);
         }
     }
     catch (error) {
